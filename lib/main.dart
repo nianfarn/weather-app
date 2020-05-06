@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:weather_app/model/json/weather.dart';
+import 'package:weather_app/service/geo.dart';
 
-import 'forecast.dart';
-import 'home.dart';
+import 'view/forecast.dart';
+import 'view/home.dart';
 
 void main() => runApp(App());
 
@@ -25,18 +28,28 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
 
-  static String london = 'London';
+  Future<Position> position;
 
   int _navigationTabIndex = 0;
-  String _appBarTitle = HomePage.title;
+  String _appBarTitle = '_appbarTitle';
   final tabAppBars = [
-    HomePage.title,
-    london
+    '_appbarTitle1',
+    '_appbarTitle2',
   ];
-  final tabs = [
-    HomePage(),
-    ForecastPage.forCity(london)
-  ];
+
+  tabs(int index, Position position) {
+    switch (index) {
+      case 0 : return HomePage(position: position);
+      case 1 : return ForecastPage(position: position);
+    }
+  }
+
+
+  @override
+  void initState() {
+    super.initState();
+    position = currentLocation();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +61,17 @@ class _HomeState extends State<Home> {
         ),
         elevation: 1,
       ),
-      body: tabs[_navigationTabIndex],
+      body: FutureBuilder<Position>(
+        future: position,
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            return tabs(_navigationTabIndex, snapshot.data);
+          } else if (snapshot.hasError) {
+            return Text("${snapshot.error}");
+          }
+          return Center(child: CircularProgressIndicator());
+        }
+      ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _navigationTabIndex,
         iconSize: 30,
@@ -66,11 +89,9 @@ class _HomeState extends State<Home> {
         onTap: (index) {
           setState(() {
             _navigationTabIndex = index;
-            _appBarTitle = london;
           });
         },
       ),
-
     );
   }
 }

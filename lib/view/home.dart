@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
+
+import '../service/weather.dart';
 
 class HomePage extends StatelessWidget {
 
-  static String title = 'Today';
+  final Position position;
+
+  const HomePage({this.position});
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +28,7 @@ class HomePage extends StatelessWidget {
           ),
           // Location.
           Center(
-              child: Text('London, UK')
+              child: Text('${position.longitude}, ${position.latitude}')
           ),
           // Temperature and weather as text.
           Padding(

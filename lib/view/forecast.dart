@@ -1,14 +1,19 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:weather_app/service/weather_service.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:intl/intl.dart';
+
+import '../service/weather.dart';
+import '../model/view/weather.dart';
 
 class ForecastPage extends StatefulWidget {
-  final String q;
+  final Position position;
 
-  ForecastPage({this.q});
+  ForecastPage({this.position});
 
-  factory ForecastPage.forCity(String q) {
+  factory ForecastPage.forPosition(Position position) {
     return ForecastPage(
-      q: q,
+      position: position,
     );
   }
 
@@ -17,19 +22,19 @@ class ForecastPage extends StatefulWidget {
 }
 
 class _ForecastPageState extends State<ForecastPage> {
-  Future<Weather> _weatherFuture;
+  Future<List<HourWeather>> _weatherFuture;
   List<ForecastWeatherView> viewList;
 
   @override
   void initState() {
     super.initState();
-    _weatherFuture = weatherByCityName(widget.q);
+    _weatherFuture = weatherByLonLat(widget.position.longitude, widget.position.altitude);
   }
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      child: FutureBuilder(
+      child: FutureBuilder<List<HourWeather>>(
           future: _weatherFuture,
           builder: (context, snapshot) {
             if (snapshot.hasData) {
@@ -49,38 +54,19 @@ class _ForecastPageState extends State<ForecastPage> {
     );
   }
 
-  List<ForecastWeatherView> _parseToView(Weather weather) {
-    // TODO parse
-    List<ForecastWeatherView> retList = List();
-    int lastParsedDay;
-    ForecastWeatherView lastParsedView;
-    for (HourlyWeather hourlyWeather in weather.list) {
-      if (lastParsedDay != hourlyWeather.time.day) {
-        // FIXME
-        var view = ForecastWeatherView(hourlyWeather.time.day.toString());
-        lastParsedView = view;
-        lastParsedDay = hourlyWeather.time.day;
-        view.addHourWeatherData(HourWeatherView(
-            degrees: hourlyWeather.stats.temp,
-            icon: Icons.wb_sunny,
-            text: hourlyWeather.description,
-            time: hourlyWeather.time.toString()));
-        retList.add(view);
-      } else {
-        lastParsedView.addHourWeatherData(HourWeatherView(
-            degrees: hourlyWeather.stats.temp,
-            icon: Icons.wb_sunny,
-            text: hourlyWeather.description,
-            time: hourlyWeather.time.toString()));
-      }
-    }
-    return retList;
+  List<ForecastWeatherView> _parseToView(List<HourWeather> weathers) {
+    weathers.sort((a, b) => a.date.compareTo(b.date));
+    var map = groupBy(weathers, (elem) => DateFormat('EEEE').format(elem.date));
+
+    List<ForecastWeatherView> list = [];
+    map.forEach((k, v) => list.add(ForecastWeatherView(day: k, list: v)));
+    return list;
   }
 }
 
 class DailyHourWeather extends StatelessWidget {
   final String dayTitle;
-  final List<HourWeatherView> list;
+  final List<HourWeather> list;
 
   const DailyHourWeather({this.dayTitle, this.list});
 
@@ -110,23 +96,15 @@ class DailyHourWeather extends StatelessWidget {
   }
 }
 
-class HourWeatherView {
-  final String time;
-  final IconData icon;
-  final String text;
-  final double degrees;
-
-  HourWeatherView({this.time, this.icon, this.text, this.degrees});
-}
-
 class HourWeatherRow extends StatelessWidget {
-  final HourWeatherView _data;
+  final HourWeather _data;
 
   HourWeatherRow(this._data);
 
   @override
   Widget build(BuildContext context) {
     var degrees = _data.degrees;
+    var iconCode = _data.iconCode;
     return Container(
       margin: const EdgeInsets.all(10),
       child: Row(
@@ -134,30 +112,19 @@ class HourWeatherRow extends StatelessWidget {
         children: <Widget>[
           Padding(
             padding: const EdgeInsets.only(right: 20),
-            child: Icon(
-              _data.icon,
-              size: 60,
-              color: Colors.orange,
+            child: Image(
+              image: AssetImage('assets/icons/$iconCode.png'),
+              height: 60,
+              width: 60,
             ),
           ),
           Column(
-            children: <Widget>[Text(_data.time), Text(_data.text)],
+            children: <Widget>[Text(DateFormat('kk:mm').format(_data.date)), Text(_data.text)],
           ),
           Expanded(child: Container()),
           Text('$degrees°')
         ],
       ),
     );
-  }
-}
-
-class ForecastWeatherView {
-  final String day;
-  final List<HourWeatherView> list;
-
-  ForecastWeatherView(this.day) : this.list = List();
-
-  void addHourWeatherData(HourWeatherView data) {
-    list.add(data);
   }
 }

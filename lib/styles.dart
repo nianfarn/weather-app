@@ -35,6 +35,15 @@ class AppStyles {
       color: Colors.blueGrey
     );
   }
+
+  static TextStyle forecastWeekDayTextStyle(BuildContext ctx) {
+    return TextStyle(
+        fontSize: AppFontSizes.largest(ctx),
+        fontFamily: 'NunitoSans',
+        fontWeight: FontWeight.w700,
+        color: Colors.blueGrey
+    );
+  }
 }
 
 class AppFontSizes {

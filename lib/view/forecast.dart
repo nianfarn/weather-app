@@ -64,7 +64,7 @@ class DailyHourWeather extends StatelessWidget {
       children: <Widget>[
         Padding(
           padding: const EdgeInsets.all(8.0),
-          child: Text(dayTitle),
+          child: Text(dayTitle, style: AppStyles.forecastWeekDayTextStyle(context)),
         ),
         Container(
           decoration: BoxDecoration(

@@ -34,7 +34,7 @@ FutureOr<void> _onCreate(Database db, int version) {
   db.execute(
     'CREATE TABLE last_weather('
         'id INTEGER PRIMARY KEY AUTOINCREMENT, '
-        'day TEXT, time TEXT, iconCode TEXT, text TEXT, degrees TEXT, '
+        'city TEXT, time TEXT, iconCode TEXT, text TEXT, degrees REAL, '
         'wind REAL, rain REAL, pressure INTEGER, humidity INTEGER, feelsLike REAL, clouds INTEGER)',
   );
 }

@@ -26,7 +26,7 @@ class HourWeather {
 
   factory HourWeather.fromDB(Map<String, dynamic> map) {
     return HourWeather(
-      date: DateTime.parse(map['dt_txt']),
+      date: DateTime.parse(map['time']),
       text: map['text'],
       iconCode: map['iconCode'],
       degrees: map['degrees'],
@@ -56,7 +56,7 @@ class HourWeather {
 
   Map<String, dynamic> toMap() {
     return {
-      'time': date.toUtc().toIso8601String(),
+      'time': date.toUtc().toString(),
       'iconCode': iconCode,
       'text': text,
       'degrees': degrees,

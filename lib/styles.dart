@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 class AppStyles {
@@ -42,6 +41,15 @@ class AppStyles {
         fontFamily: 'NunitoSans',
         fontWeight: FontWeight.w700,
         color: Colors.blueGrey
+    );
+  }
+
+  static TextStyle errorLargeTextStyle(BuildContext ctx) {
+    return TextStyle(
+      fontSize: AppFontSizes.largest(ctx),
+      fontFamily: 'NunitoSans',
+      fontWeight: FontWeight.w400,
+      color: Colors.redAccent
     );
   }
 }

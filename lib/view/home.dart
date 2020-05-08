@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:weather_app/model/view/weather.dart';
 import 'package:weather_app/service/resource.dart';
+import 'package:weather_app/service/weather.dart';
 
 import '../styles.dart';
 
 class HomePage extends StatelessWidget {
 
   final Future<List<HourWeather>> weather;
-
   final String city;
 
   const HomePage({Key key, this.weather, this.city}) : super(key: key);
@@ -19,6 +19,10 @@ class HomePage extends StatelessWidget {
       child: FutureBuilder(
         future: weather,
           builder: (BuildContext context, AsyncSnapshot snapshot) {
+            if (snapshot.error is DataException) {
+              DataException error = snapshot.error;
+              return Text(error.message, style: AppStyles.errorLargeTextStyle(context));
+            }
             return Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.start,
@@ -79,7 +83,7 @@ class HomePage extends StatelessWidget {
   }
 
   Widget _currentWeatherIcon(List<HourWeather> hourList) {
-    return weatherIcon(hourList[0].iconCode);
+    return weatherIcon(hourList[0]?.iconCode);
   }
 
   List<Widget> currentStats(List<HourWeather> hourList) {

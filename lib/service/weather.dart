@@ -2,12 +2,18 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 import 'package:weather_app/model/view/weather.dart';
+import 'package:weather_app/service/geo.dart';
 import '../service/weather_db.dart' as db;
 
 const String baseUrl = 'https://api.openweathermap.org/data/2.5/forecast';
 const String apiKey = '13c3e33f00d3cdd37c4d586f49527f4f';
 
-Future<List<HourWeather>> weatherByLonLat(double lon, double lat) async {
+Future<List<HourWeather>> localWeather() async {
+  var location = await currentLocation();
+  return _weatherByLonLat(location.longitude, location.latitude);
+}
+
+Future<List<HourWeather>> _weatherByLonLat(double lon, double lat) async {
   var response;
 
   try {
@@ -22,6 +28,10 @@ Future<List<HourWeather>> weatherByLonLat(double lon, double lat) async {
 }
 
 Future<List<HourWeather>> lastWeather() async {
+  var list = await db.lastWeather();
+  if (list.isEmpty) {
+     throw DataException.noInitialWeather();
+  }
   return await db.lastWeather();
 }
 
@@ -31,5 +41,16 @@ List<HourWeather> _weatherFrom(http.Response response) {
     return HourWeather.listFromMap(map);
   } else {
     throw Exception('Failed to load weather');
+  }
+}
+
+class DataException implements Exception {
+
+  final String message;
+
+  DataException(this.message);
+
+  factory DataException.noInitialWeather() {
+    return DataException('Missing any past results. Enable internet connection');
   }
 }

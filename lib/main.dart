@@ -1,7 +1,8 @@
+import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:weather_app/service/geo.dart';
 
+import 'model/view/weather.dart';
 import 'service/weather.dart';
 import 'view/forecast.dart';
 import 'view/home.dart';
@@ -29,16 +30,16 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
 
-  Future<Position> position;
+  Future<List<HourWeather>> weather;
   Future<String> city;
+  var connection;
 
   int _navigationTabIndex = 0;
 
-  tabs(int index, Position position, String city) {
-    var weather = weatherByLonLat(position.longitude, position.latitude);
+  tabs(int index, String city) {
     switch (index) {
       case 0 : return HomePage(weather: weather, city: city);
-      case 1 : return ForecastPage(weather: weather);
+      case 1 : return ForecastPage(initialWeather: weather);
     }
   }
 
@@ -46,8 +47,23 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
     super.initState();
-    position = currentLocation();
+    weather = localWeather();
     city = currentCity();
+
+    connection = Connectivity().onConnectivityChanged.listen((ConnectivityResult result) {
+      if (result != ConnectivityResult.none) {
+        setState(() {
+          weather = localWeather();
+        });
+      }
+    });
+  }
+
+
+  @override
+  void dispose() {
+    super.dispose();
+    connection.cancel();
   }
 
   @override
@@ -63,10 +79,10 @@ class _HomeState extends State<Home> {
         elevation: 1,
       ),
       body: FutureBuilder(
-        future: Future.wait([position, city]),
+        future: city,
         builder: (context, snapshot) {
           if (snapshot.hasData) {
-            return tabs(_navigationTabIndex, snapshot.data[0], snapshot.data[1]);
+            return tabs(_navigationTabIndex, snapshot.data);
           } else if (snapshot.hasError) {
             return Text("${snapshot.error}");
           }

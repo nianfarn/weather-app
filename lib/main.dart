@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:weather_app/model/json/weather.dart';
 import 'package:weather_app/service/geo.dart';
 
+import 'service/weather.dart';
 import 'view/forecast.dart';
 import 'view/home.dart';
 
@@ -12,6 +12,7 @@ class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Weather App',
       home: Home(),
       theme: ThemeData(
@@ -29,18 +30,15 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
 
   Future<Position> position;
+  Future<String> city;
 
   int _navigationTabIndex = 0;
-  String _appBarTitle = '_appbarTitle';
-  final tabAppBars = [
-    '_appbarTitle1',
-    '_appbarTitle2',
-  ];
 
-  tabs(int index, Position position) {
+  tabs(int index, Position position, String city) {
+    var weather = weatherByLonLat(position.longitude, position.latitude);
     switch (index) {
-      case 0 : return HomePage(position: position);
-      case 1 : return ForecastPage(position: position);
+      case 0 : return HomePage(weather: weather, city: city);
+      case 1 : return ForecastPage(weather: weather);
     }
   }
 
@@ -49,23 +47,26 @@ class _HomeState extends State<Home> {
   void initState() {
     super.initState();
     position = currentLocation();
+    city = currentCity();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        // TODO: Should I add rainbow border?
-        title: Center(
-            child: Text(_appBarTitle)
+        title: FutureBuilder<String>(
+          future: city,
+          builder: (context, snapshot) {
+            return snapshot.hasData ? Text(snapshot.data) : Container();
+          },
         ),
         elevation: 1,
       ),
-      body: FutureBuilder<Position>(
-        future: position,
+      body: FutureBuilder(
+        future: Future.wait([position, city]),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
-            return tabs(_navigationTabIndex, snapshot.data);
+            return tabs(_navigationTabIndex, snapshot.data[0], snapshot.data[1]);
           } else if (snapshot.hasError) {
             return Text("${snapshot.error}");
           }
@@ -78,11 +79,11 @@ class _HomeState extends State<Home> {
         selectedItemColor: Colors.deepOrange,
         items: [
           BottomNavigationBarItem(
-              icon: Icon(Icons.wb_sunny),
+              icon: Icon(Icons.home),
               title: Text('Today')
           ),
           BottomNavigationBarItem(
-              icon: Icon(Icons.wb_cloudy),
+              icon: Icon(Icons.format_list_bulleted),
               title: Text('Forecast')
           ),
         ],

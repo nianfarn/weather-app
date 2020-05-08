@@ -1,41 +1,29 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
+import 'package:weather_app/service/resource.dart';
 
-import '../service/weather.dart';
 import '../model/view/weather.dart';
+import '../styles.dart';
 
 class ForecastPage extends StatefulWidget {
-  final Position position;
+  final Future<List<HourWeather>> weather;
 
-  ForecastPage({this.position});
+  const ForecastPage({Key key, this.weather}) : super(key: key);
 
-  factory ForecastPage.forPosition(Position position) {
-    return ForecastPage(
-      position: position,
-    );
-  }
 
   @override
   _ForecastPageState createState() => _ForecastPageState();
 }
 
 class _ForecastPageState extends State<ForecastPage> {
-  Future<List<HourWeather>> _weatherFuture;
   List<ForecastWeatherView> viewList;
-
-  @override
-  void initState() {
-    super.initState();
-    _weatherFuture = weatherByLonLat(widget.position.longitude, widget.position.altitude);
-  }
 
   @override
   Widget build(BuildContext context) {
     return Container(
       child: FutureBuilder<List<HourWeather>>(
-          future: _weatherFuture,
+          future: widget.weather,
           builder: (context, snapshot) {
             if (snapshot.hasData) {
               viewList = _parseToView(snapshot.data);
@@ -112,17 +100,21 @@ class HourWeatherRow extends StatelessWidget {
         children: <Widget>[
           Padding(
             padding: const EdgeInsets.only(right: 20),
-            child: Image(
-              image: AssetImage('assets/icons/$iconCode.png'),
-              height: 60,
-              width: 60,
-            ),
+            child: weatherIcon(iconCode, 80, 80),
           ),
           Column(
-            children: <Widget>[Text(DateFormat('kk:mm').format(_data.date)), Text(_data.text)],
+            children: <Widget>[
+              Text(DateFormat('kk:mm').format(_data.date),
+                style: AppStyles.forecastTimeTextStyle(context)
+              ),
+              Text(_data.text, style: AppStyles.forecastTimeTextStyle(context))
+            ],
           ),
           Expanded(child: Container()),
-          Text('$degrees°')
+          Container(
+            alignment: Alignment.centerRight,
+            child: Text('${degrees.toDouble().toStringAsFixed(1)}°', style: AppStyles.forecastDegreesTextStyle(context))
+          )
         ],
       ),
     );

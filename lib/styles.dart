@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
 
+class AppSizes {
+  static double homeBigIconSize(BuildContext ctx) {
+    return MediaQuery.of(ctx).size.height / 3;
+  }
+}
+
 class AppStyles {
 
   static TextStyle homeLargeTextStyle() {

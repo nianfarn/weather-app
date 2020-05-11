@@ -47,13 +47,13 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
     super.initState();
-    weather = localWeather();
-    city = currentCity();
 
     connection = Connectivity().onConnectivityChanged.listen((ConnectivityResult result) {
       if (result != ConnectivityResult.none) {
         setState(() {
-          weather = localWeather();
+          var location = currentLocation();
+          weather = localWeather(location);
+          city = currentCity(location);
         });
       }
     });

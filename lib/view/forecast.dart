@@ -2,6 +2,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:weather_app/service/geo.dart';
 import 'package:weather_app/service/resource.dart';
 import 'package:weather_app/service/weather.dart';
 
@@ -49,7 +50,7 @@ class _ForecastPageState extends State<ForecastPage> {
                       );
                     }),
                   onRefresh: () async {
-                    _weather = localWeather();
+                    _weather = localWeather(currentLocation());
                     return null;
                   },
               );

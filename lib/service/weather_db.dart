@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
-import 'package:weather_app/model/view/weather.dart';
+import '../model/view/weather.dart';
 
 void updateLastWeather(List<HourWeather> weathers) async {
   var db = await _open('last_weather.db');

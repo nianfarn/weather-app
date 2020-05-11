@@ -2,9 +2,10 @@ import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:weather_app/service/resource.dart';
-import 'package:weather_app/service/weather.dart';
 
+import '../service/geo.dart';
+import '../service/resource.dart';
+import '../service/weather.dart';
 import '../model/view/weather.dart';
 import '../styles.dart';
 
@@ -48,9 +49,11 @@ class _ForecastPageState extends State<ForecastPage> {
                         list: viewList[index].list,
                       );
                     }),
-                  onRefresh: () async {
-                    _weather = localWeather();
-                    return null;
+                  onRefresh: () {
+                    setState(() {
+                      _weather = localWeather(currentLocation());
+                    });
+                    return Future.value(null);
                   },
               );
             } else if (snapshot.hasError) {

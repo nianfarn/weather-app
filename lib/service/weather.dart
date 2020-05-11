@@ -1,15 +1,16 @@
 import 'dart:convert';
 
+import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
-import 'package:weather_app/model/view/weather.dart';
-import 'package:weather_app/service/geo.dart';
+
+import '../model/view/weather.dart';
 import '../service/weather_db.dart' as db;
 
 const String baseUrl = 'https://api.openweathermap.org/data/2.5/forecast';
 const String apiKey = '13c3e33f00d3cdd37c4d586f49527f4f';
 
-Future<List<HourWeather>> localWeather() async {
-  var location = await currentLocation();
+Future<List<HourWeather>> localWeather(Future<Position> currentLocation) async {
+  var location = await currentLocation;
   return _weatherByLonLat(location.longitude, location.latitude);
 }
 

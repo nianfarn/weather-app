@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:weather_app/model/view/weather.dart';
-import 'package:weather_app/service/resource.dart';
-import 'package:weather_app/service/weather.dart';
 
+import '../model/view/weather.dart';
+import '../service/resource.dart';
 import '../styles.dart';
 
 class HomePage extends StatelessWidget {
@@ -14,63 +13,64 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(30),
-      child: FutureBuilder(
-        future: weather,
-          builder: (BuildContext context, AsyncSnapshot snapshot) {
-            if (snapshot.error is DataException) {
-              DataException error = snapshot.error;
-              return Text(error.message, style: AppStyles.errorLargeTextStyle(context));
-            }
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: <Widget>[
-                // Weather status as icon.
-                SizedBox(
-                    height: 300,
-                    width: 300,
-                    child: FittedBox(
-                        fit: BoxFit.fill,
-                        child: snapshot.hasData
-                            ? _currentWeatherIcon(snapshot.data)
-                            : Container(),
-                    )
-                ),
-                // Location.
-                Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Center(
-                      child: snapshot.hasData
-                          ? Text('$city | ${currentDegrees(snapshot.data)}°',
-                            style: AppStyles.homeLargeTextStyle()
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(30),
+        child: FutureBuilder(
+          future: weather,
+            builder: (BuildContext context, AsyncSnapshot snapshot) {
+              if (snapshot.hasError) {
+                return Text(snapshot.error.toString(), style: AppStyles.errorLargeTextStyle(context));
+              }
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: <Widget>[
+                  // Weather status as icon.
+                  SizedBox(
+                      height: AppSizes.homeBigIconSize(context),
+                      width: AppSizes.homeBigIconSize(context),
+                      child: FittedBox(
+                          fit: BoxFit.fill,
+                          child: snapshot.hasData
+                              ? _currentWeatherIcon(snapshot.data)
+                              : Container(),
                       )
-                          : Container()
                   ),
-                ),
-                // Temperature and weather as text.
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 20),
-                  child: Container(
-                    decoration: BoxDecoration(
-                        border: Border(
-                            top: _borderSide(),
-                            bottom: _borderSide()
+                  // Location.
+                  Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Center(
+                        child: snapshot.hasData
+                            ? Text('$city | ${currentDegrees(snapshot.data)}°',
+                              style: AppStyles.homeLargeTextStyle()
                         )
-                    ),
-                    child: snapshot.hasData
-                        ? Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: currentStats(snapshot.data)
-                    )
-                        : Container(),
+                            : Container()
                     ),
                   ),
-                ShareButton()
-              ],
-            );
-          }
+                  // Temperature and weather as text.
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 20),
+                    child: Container(
+                      decoration: BoxDecoration(
+                          border: Border(
+                              top: _borderSide(),
+                              bottom: _borderSide()
+                          )
+                      ),
+                      child: snapshot.hasData
+                          ? Wrap(
+                        alignment: WrapAlignment.center,
+                        children: currentStats(snapshot.data)
+                      )
+                          : Container(),
+                      ),
+                    ),
+                  ShareButton()
+                ],
+              );
+            }
+        ),
       ),
     );
   }

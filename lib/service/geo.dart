@@ -4,12 +4,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 const lastCityKey = 'last_city';
 
-Future<String> currentCity() async {
+Future<String> currentCity(Future<Position> currentLocation) async {
+  final position = await currentLocation;
+  final coordinates = new Coordinates(position.latitude, position.longitude);
   var city;
 
   try {
-    final position = await currentLocation();
-    final coordinates = new Coordinates(position.latitude, position.longitude);
     var addresses = await Geocoder.local.findAddressesFromCoordinates(coordinates);
     city = addresses.first.locality;
   } catch (e) {
